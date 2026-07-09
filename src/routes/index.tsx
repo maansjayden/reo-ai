@@ -5,6 +5,7 @@ import {
   Menu, X, Copy, Check, Send, Plus, Trash2, Sparkles,
 } from "lucide-react";
 import { generateEmail } from "@/lib/email.functions";
+import { researchTopic } from "@/lib/research.functions";
 
 
 export const Route = createFileRoute("/")({ component: App });
@@ -457,23 +458,22 @@ function ResearchAssistant() {
   const [topic, setTopic] = useState("");
   const [insights, setInsights] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const search = (e: React.FormEvent) => {
+  const search = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) return;
+    const t = topic.trim();
+    if (!t) return;
     setLoading(true);
-    setTimeout(() => {
-      const t = topic.trim();
-      setInsights([
-        `${t} is gaining measurable traction across enterprise and mid-market segments, with adoption led by teams focused on workflow automation.`,
-        `Recent industry reports highlight ${t} as a top-three investment priority for the coming fiscal year.`,
-        `Practitioners cite integration depth and data privacy as the two most important criteria when evaluating ${t} solutions.`,
-        `Early adopters report productivity gains between 15% and 30%, though results vary significantly by team maturity.`,
-        `Emerging best practices around ${t} emphasize small, iterative rollouts with clear success metrics tracked weekly.`,
-        `Watch for consolidation among ${t} vendors over the next 12 to 18 months as the category matures.`,
-      ]);
+    setError(null);
+    try {
+      const res = await researchTopic({ data: { topic: t } });
+      setInsights(res.insights);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate insights");
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (
@@ -493,6 +493,7 @@ function ResearchAssistant() {
             <Sparkles className="h-4 w-4" /> {loading ? "Researching..." : "Get insights"}
           </Button>
         </form>
+        {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
       </Card>
 
       {insights.length > 0 && (
@@ -501,6 +502,7 @@ function ResearchAssistant() {
     </div>
   );
 }
+
 
 /* ---------- 5. Chatbot ---------- */
 
