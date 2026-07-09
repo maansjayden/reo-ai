@@ -586,35 +586,40 @@ function Chatbot() {
 
 function ChatBubble({ msg, onEdit }: { msg: Msg; onEdit: (v: string) => void }) {
   const isUser = msg.role === "user";
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
+  // Only sync from state -> DOM when the external text differs from what's
+  // already rendered. This preserves caret position while editing.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+    if (el.innerText !== msg.text) {
+      el.innerText = msg.text;
+    }
   }, [msg.text]);
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[85%] overflow-hidden rounded-2xl px-4 py-2.5 text-sm ${
+        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
             ? "bg-primary text-primary-foreground"
             : "bg-card text-card-foreground shadow-[var(--shadow-card)]"
         }`}
       >
-        <textarea
+        <div
           ref={ref}
-          value={msg.text}
-          onChange={(e) => onEdit(e.target.value)}
-          rows={1}
-          className="block w-full resize-none overflow-hidden whitespace-pre-wrap break-words bg-transparent leading-relaxed outline-none"
+          contentEditable
+          suppressContentEditableWarning
+          onInput={(e) => onEdit((e.currentTarget as HTMLDivElement).innerText)}
+          spellCheck={false}
+          className="w-full whitespace-pre-wrap break-words outline-none"
         />
       </div>
     </div>
   );
 }
+
 
 function localReply(q: string): string {
   const s = q.toLowerCase().trim();
@@ -638,6 +643,7 @@ function localReply(q: string): string {
     case "summarize":
       return "Aim for a three-part recap: Key Decisions, Action Items with owners and deadlines, and Open Questions. Paste your transcript into the Meeting Summarizer tab for an instant structured version.";
     default:
-      return "Here's a general productivity optimization: define the outcome in one sentence, identify the single biggest blocker, and pick the smallest next action you can take in under 15 minutes. Consistent small progress compounds faster than occasional heroic sprints.";
+      return "I am REO, an AI optimized strictly for workplace productivity. While I cannot answer general knowledge queries, I am ready to help you draft communications, plan your daily tasks, or summarize meeting notes. How can I assist your workflow today?";
+
   }
 }
