@@ -4,11 +4,11 @@ A centralized SaaS application featuring a suite of AI powered tools designed to
 
 ## Live Links
 
-* Lovable Project: [Insert Link]
+* Lovable Project: https://lovable.dev/projects/32384168-c52e-448e-872c-94631c4d8ae1
 
-* GitHub Repository: [Insert Link]
+* GitHub Repository: https://github.com/maansjayden/reo-ai
 
-* Live Application: [Insert Link if deployed]
+* Live Application: https://reo-ai.lovable.app
 
 ## Core Features
 
