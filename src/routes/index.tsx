@@ -4,6 +4,8 @@ import {
   Mail, FileText, LayoutGrid, Search, MessageSquare,
   Menu, X, Copy, Check, Send, Plus, Trash2, Sparkles,
 } from "lucide-react";
+import { generateEmail } from "@/lib/email.functions";
+
 
 export const Route = createFileRoute("/")({ component: App });
 
