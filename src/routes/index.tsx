@@ -633,17 +633,17 @@ function localReply(q: string): string {
 
   switch (keyword) {
     case "help":
-      return "I can help with five workplace areas:\n• Email drafting and tone tuning\n• Scheduling and calendar strategy\n• Meeting prep, agendas, and follow-ups\n• Summarizing notes or transcripts\n• General productivity coaching\n\nTip: type 'clear' to reset this chat.";
+      return `I am REO, your conversational workplace assistant. Right here in chat I can help you:\n• Draft and refine emails\n• Prioritize tasks and plan your day\n• Prepare for meetings\n• Summarize notes and isolate action items\n• Optimize your workflow\n\nTry asking about email subjects, the Eisenhower Matrix, meeting prep, or active listening. Type 'clear' to reset the chat.`;
     case "email":
-      return "For a strong email: lead with the ask in the first sentence, add one line of context, and close with a clear next step and date. Head to the Email Generator tab to draft one with a specific tone.";
+      return `Here are three professional subject line templates for difficult workplace conversations:\n\n1. "Request: quick alignment on [topic] before [deadline]" — frames urgency without blame.\n2. "Following up on [decision]: next steps and timeline" — keeps the focus forward-looking.\n3. "A brief note on [situation]: can we find 10 minutes to sync?" — opens a dialogue instead of escalating.\n\nTip: keep the subject under 8 words, name the topic, and avoid emotional words like 'urgent' unless it truly is.`;
     case "schedule":
-      return "Protect two deep-work blocks each day and cluster meetings into a single afternoon window. When scheduling, always propose two concrete time options and a clear default so the reply is one click.";
+      return `Here is a quick breakdown of the Eisenhower Matrix for task prioritization:\n\n1. Urgent & Important — Do first. Crises, deadlines, pressing problems.\n2. Important & Not Urgent — Schedule. Planning, skill building, relationship building.\n3. Urgent & Not Important — Delegate. Interruptions, some emails and meetings.\n4. Not Urgent & Not Important — Delete or defer. Busy work, excessive notifications.\n\nTip: spend most of your time in quadrant 2; that is where long-term productivity lives.`;
     case "meeting":
-      return "Effective meetings need three things: a one-line objective, a three-bullet agenda with owners, and a written recap with action items and due dates. The Meeting Summarizer tab can extract those from a transcript.";
+      return `Here is a quick checklist of three things to prepare before joining a client call:\n\n1. Know the objective — write down the one outcome the call must achieve.\n2. Prepare three talking points — client context, open questions, and the value you bring.\n3. Confirm logistics and materials — test your audio/video, have the agenda visible, and open any shared documents before the call starts.\n\nBonus: send a one-line agenda 10 minutes ahead so everyone arrives aligned.`;
     case "summarize":
-      return "Aim for a three-part recap: Key Decisions, Action Items with owners and deadlines, and Open Questions. Paste your transcript into the Meeting Summarizer tab for an instant structured version.";
+      return `Here is a tip on how to actively listen and isolate action items during a busy call:\n\nListen for three signals: decisions ('we agreed...'), owners ('Alex will...'), and deadlines ('by Friday...'). Jot each in a three-column grid: Decision | Owner | Due Date. Ignore filler and repeated examples. At the end, read back the action items aloud to confirm ownership before the call ends.\n\nThis keeps your recap accurate and prevents tasks from slipping through the cracks.`;
     default:
-      return "I am REO, an AI optimized strictly for workplace productivity. While I cannot answer general knowledge queries, I am ready to help you draft communications, plan your daily tasks, or summarize meeting notes. How can I assist your workflow today?";
+      return `I am REO, an AI optimized strictly for workplace productivity. While I cannot answer general knowledge queries, I am ready to help you draft communications, plan your daily tasks, or summarize meeting notes. How can I assist your workflow today?`;
 
   }
 }
