@@ -244,6 +244,8 @@ function EmailGenerator() {
           <Button onClick={generate} disabled={loading}>
             <Sparkles className="h-4 w-4" /> {loading ? "Drafting..." : "Generate Email"}
           </Button>
+          {error && <p className="text-xs text-rose-400">{error}</p>}
+
         </div>
       </Card>
 
