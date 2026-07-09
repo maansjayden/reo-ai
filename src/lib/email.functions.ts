@@ -36,11 +36,10 @@ export const generateEmail = createServerFn({ method: "POST" })
     try {
       const { text } = await generateText({
         model,
-        messages: [
-          { role: "system", content: SYSTEM },
-          { role: "user", content: userPrompt },
-        ],
+        system: SYSTEM,
+        prompt: userPrompt,
       });
+
       return { text: text.trim() };
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to generate email";
