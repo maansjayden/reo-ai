@@ -4,6 +4,8 @@ import {
   Mail, FileText, LayoutGrid, Search, MessageSquare,
   Menu, X, Copy, Check, Send, Plus, Trash2, Sparkles,
 } from "lucide-react";
+import { generateEmail } from "@/lib/email.functions";
+
 
 export const Route = createFileRoute("/")({ component: App });
 
@@ -194,32 +196,23 @@ function EmailGenerator() {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const generate = () => {
+  const [error, setError] = useState<string | null>(null);
+
+  const generate = async () => {
     setLoading(true);
-    setTimeout(() => {
-      const name = recipient.split(/[@\s]/)[0] || "there";
-      const toneLine = {
-        Professional: "I hope this message finds you well.",
-        Friendly: "Hope you're having a great week!",
-        Concise: "Quick note below.",
-        Formal: "I trust this correspondence reaches you in good standing.",
-        Persuasive: "I wanted to share something I believe will genuinely help.",
-      }[tone] ?? "";
-      const body = context.trim() || "following up on our recent discussion";
-      const draft = `Hi ${name.charAt(0).toUpperCase() + name.slice(1)},
-
-${toneLine}
-
-I'm reaching out regarding ${body}. I'd love to align on the next steps and make sure we're moving in the same direction. Please let me know a time that works for a quick sync, or feel free to reply here with your thoughts.
-
-Looking forward to hearing back.
-
-Best regards,
-[Your name]`;
-      setOutput(draft);
+    setError(null);
+    try {
+      const { text } = await generateEmail({
+        data: { recipient, subject, tone, context },
+      });
+      setOutput(text);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate email");
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
+
 
   return (
     <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-2">
@@ -251,6 +244,8 @@ Best regards,
           <Button onClick={generate} disabled={loading}>
             <Sparkles className="h-4 w-4" /> {loading ? "Drafting..." : "Generate Email"}
           </Button>
+          {error && <p className="text-xs text-rose-400">{error}</p>}
+
         </div>
       </Card>
 
