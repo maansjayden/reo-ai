@@ -506,36 +506,57 @@ function ResearchAssistant() {
 
 type Msg = { role: "user" | "assistant"; text: string };
 
+const INITIAL_MSG: Msg = {
+  role: "assistant",
+  text: "Hi, I'm REO. Ask me anything about workplace productivity — email drafts, meeting prep, task strategies, or team workflows. Type 'clear' any time to reset the chat.",
+};
+
 function Chatbot() {
-  const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", text: "Hi, I'm REO. Ask me anything about workplace productivity — email drafts, meeting prep, task strategies, or team workflows." },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>([INITIAL_MSG]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
   const send = (e: React.FormEvent) => {
     e.preventDefault();
     const q = input.trim();
     if (!q) return;
+
+    if (["clear", "/clear", "clera"].includes(q.toLowerCase())) {
+      setMessages([]);
+      setInput("");
+      return;
+    }
+
     setMessages((m) => [...m, { role: "user", text: q }]);
     setInput("");
     setTyping(true);
     setTimeout(() => {
-      setMessages((m) => [...m, { role: "assistant", text: mockReply(q) }]);
+      setMessages((m) => [...m, { role: "assistant", text: localReply(q) }]);
       setTyping(false);
-    }, 700);
+    }, 500);
   };
 
   return (
     <div className="mx-auto flex h-[calc(100vh-14rem)] max-w-3xl flex-col">
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto pb-4">
+      <div
+        ref={scrollRef}
+        className="scrollbar-thin flex-1 space-y-4 overflow-y-auto pb-4 pr-1"
+      >
         {messages.map((m, i) => (
-          <ChatBubble key={i} msg={m} onEdit={(v) => setMessages(messages.map((x, idx) => idx === i ? { ...x, text: v } : x))} />
+          <ChatBubble
+            key={i}
+            msg={m}
+            onEdit={(v) =>
+              setMessages((prev) => prev.map((x, idx) => (idx === i ? { ...x, text: v } : x)))
+            }
+          />
         ))}
         {typing && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -553,7 +574,7 @@ function Chatbot() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask REO..."
+          placeholder="Ask REO... (type 'clear' to reset)"
         />
         <Button type="submit" disabled={!input.trim()}>
           <Send className="h-4 w-4" />
@@ -565,32 +586,58 @@ function Chatbot() {
 
 function ChatBubble({ msg, onEdit }: { msg: Msg; onEdit: (v: string) => void }) {
   const isUser = msg.role === "user";
-  const rows = useMemo(() => Math.min(8, Math.max(1, Math.ceil(msg.text.length / 60))), [msg.text]);
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [msg.text]);
+
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+        className={`max-w-[85%] overflow-hidden rounded-2xl px-4 py-2.5 text-sm ${
           isUser
             ? "bg-primary text-primary-foreground"
             : "bg-card text-card-foreground shadow-[var(--shadow-card)]"
         }`}
       >
         <textarea
+          ref={ref}
           value={msg.text}
           onChange={(e) => onEdit(e.target.value)}
-          rows={rows}
-          className="w-full resize-none bg-transparent leading-relaxed outline-none"
+          rows={1}
+          className="block w-full resize-none overflow-hidden whitespace-pre-wrap break-words bg-transparent leading-relaxed outline-none"
         />
       </div>
     </div>
   );
 }
 
-function mockReply(q: string): string {
-  const s = q.toLowerCase();
-  if (/email|draft|reply/.test(s)) return "For a strong email: lead with the ask in one sentence, add one line of context, and end with a clear next step or date. Want me to draft one in the Email Generator tab?";
-  if (/meeting|agenda|standup/.test(s)) return "Keep meetings tight: 3 bullet agenda, one clear owner per topic, and end with named action items and due dates. I can summarize a transcript for you in the Summarizer tab.";
-  if (/task|priorit|focus/.test(s)) return "Try grouping tasks by outcome, not activity. Pick your top 3 for the day, mark the single most important, and defer everything else. The Task Planner tab has a Kanban board you can use.";
-  if (/research|market|competitor/.test(s)) return "Start broad, then narrow: define one question, list three angles, and gather two credible sources per angle. Head to the Research Assistant tab for a quick synthesis.";
-  return `Great question. A useful frame for "${q}" is to define the outcome, remove one blocker, and choose the smallest next action you can take today. Want me to break that down further?`;
+function localReply(q: string): string {
+  const s = q.toLowerCase().trim();
+
+  let keyword: "help" | "email" | "schedule" | "meeting" | "summarize" | "default" = "default";
+  if (/\bhelp\b|what can you do|commands?/.test(s)) keyword = "help";
+  else if (/email|draft|reply|inbox/.test(s)) keyword = "email";
+  else if (/schedule|calendar|book|reschedul/.test(s)) keyword = "schedule";
+  else if (/meeting|standup|1:1|agenda/.test(s)) keyword = "meeting";
+  else if (/summar|recap|tl;?dr|notes?/.test(s)) keyword = "summarize";
+
+  switch (keyword) {
+    case "help":
+      return "I can help with five workplace areas:\n• Email drafting and tone tuning\n• Scheduling and calendar strategy\n• Meeting prep, agendas, and follow-ups\n• Summarizing notes or transcripts\n• General productivity coaching\n\nTip: type 'clear' to reset this chat.";
+    case "email":
+      return "For a strong email: lead with the ask in the first sentence, add one line of context, and close with a clear next step and date. Head to the Email Generator tab to draft one with a specific tone.";
+    case "schedule":
+      return "Protect two deep-work blocks each day and cluster meetings into a single afternoon window. When scheduling, always propose two concrete time options and a clear default so the reply is one click.";
+    case "meeting":
+      return "Effective meetings need three things: a one-line objective, a three-bullet agenda with owners, and a written recap with action items and due dates. The Meeting Summarizer tab can extract those from a transcript.";
+    case "summarize":
+      return "Aim for a three-part recap: Key Decisions, Action Items with owners and deadlines, and Open Questions. Paste your transcript into the Meeting Summarizer tab for an instant structured version.";
+    default:
+      return "Here's a general productivity optimization: define the outcome in one sentence, identify the single biggest blocker, and pick the smallest next action you can take in under 15 minutes. Consistent small progress compounds faster than occasional heroic sprints.";
+  }
 }
